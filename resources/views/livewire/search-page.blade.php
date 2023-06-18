@@ -8,7 +8,7 @@
                     </div>
                     <div class="flex items-center" wire:loading.remove>
                         <input
-                            wire:model="userPrompt"
+                            wire:model.defer="userPrompt"
                             wire:keydown.enter="onClickSearch"
                             type="text"
                             name="userPrompt"
@@ -28,7 +28,7 @@
                             Search
                         </button>
                     </div>
-                    <div class="mt-2">
+                    <div class="mt-2" wire:loading.remove>
                         <a href="#" class="text-gray-500" wire:click="$emit('tagClicked','o gustare pentru cei mici')">#anything</a>
                         <a href="#" class="text-gray-500 ml-2" wire:click="$emit('tagClicked','o bautura pentru zile caniculare')">#hotDayDrink</a>
                         <a href="#" class="text-gray-500 ml-2" wire:click="$emit('tagClicked','o bautura pentru zile reci si ploioase')">#coldDayDrink</a>
@@ -70,7 +70,7 @@
                         </div>
                         <div>
                             <h2 class="text-lg">Preparare</h2>
-                            <p>{{ $this->recipe['instructions'] }}</p>
+                            <p>{!! $this->recipe['instructions'] !!}</p>
                         </div>
                     </div>
                 </div>

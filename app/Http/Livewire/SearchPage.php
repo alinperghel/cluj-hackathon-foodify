@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Recipe;
 use Livewire\Component;
 use OpenAI\Client;
 
@@ -13,6 +14,7 @@ class SearchPage extends Component
     private Client $openAIClient;
 
     protected $listeners = ['tagClicked' => 'onTagClicked'];
+    public array $recipe = [];
 
     public function __construct()
     {
@@ -29,6 +31,7 @@ class SearchPage extends Component
         $this->userPrompt = $tag;
         $this->isLoading = true;
         $this->onClickSearch();
+        $this->userPrompt = '';
     }
 
     public function onClickSearch()
@@ -67,13 +70,22 @@ class SearchPage extends Component
         } catch (\Exception $exception) {
             $this->message = 'RateLimitException. Te rog sa incerci din nou.';
         }
-        $this->userPrompt = '';
 
         if (isset($recipe['title']) && isset($recipe['ingredients']) && isset($recipe['instructions'])) {
             $this->recipe = $recipe;
+            $this->recipe['instructions'] = $this->formatInstructions($recipe['instructions']);
+            $dbRecepie = new Recipe([
+                'title' => $this->recipe['title'],
+                'prompt' => $this->userPrompt,
+                'ingredients' => $this->recipe['ingredients'],
+                'instructions' => $this->recipe['instructions'],
+            ]);
+            $dbRecepie->save();
         } else {
             $this->message = 'RateLimitException. Te rog sa incerci din nou.';
         }
+
+
 
         $this->isLoading = false;
     }
@@ -84,5 +96,21 @@ class SearchPage extends Component
             'userPrompt' => $this->userPrompt,
             'isLoading' => $this->isLoading,
         ]);
+    }
+
+    private function formatInstructions(string $instructions): string
+    {
+        $pattern = '/(\d+)\. (.+?)(?=\d+\.|\z)/s'; // Regex pattern to match numbers followed by text
+
+        $matches = array();
+        preg_match_all($pattern, $instructions, $matches);
+
+        $results = '';
+
+        foreach ($matches[1] as $key => $number) {
+            $results .= $number . '. ' . $matches[2][$key] . "<br/>";
+        }
+
+        return $results;
     }
 }

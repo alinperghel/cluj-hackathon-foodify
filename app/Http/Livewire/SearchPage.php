@@ -120,32 +120,28 @@ class SearchPage extends Component
     {
         $recomandation = '';
         try {
-            $campaigns = Campaign::all();
-            $products = '';
-            foreach ($campaigns as $campaign) {
-                $products .= $campaign->name . ' -> ' . $campaign->url . ' \n';
-            }
+            $campaigns = Campaign::all('name', 'url');
             $response = $this->openAIClient->chat()->create([
                 'model' => 'gpt-3.5-turbo',
                 'messages' => [
                     [
                         'role' => 'system',
-                        'content' => 'Esti un sistem de recomandari.',
+                        'content' => 'Esti un sistem ce face sugestii de cumparare in functie de campanile active si ingredientele unei retete.',
                     ],
                     [
                         'role' => 'user',
-                        'content' => 'Avand aceste produse in baza de date de campanii: \n'.
-                            $products.
-                            'In cazul in care ingredientele din reteta urmatoare au legatura cu produsele vei genera o recomandare de cumparare.\n'.
-                            'Reteta este: \n'.
-                            json_encode($recipe).'\n\n'.
+                        'content' => 'Campanii active: \n'.
+                            json_encode($campaigns).
+                            'Lista de ingrediente: \n'.
+                            json_encode($recipe['ingredients']).'\n\n'.
+                            'Vei genera o recomandare de cumparare numai in cazul in care produsele din campanile active au legatura cu incredientele.\n'.
                             'Vei raspunde cu un HTML ce poate fi randat pe o pagina. Nu vei oferi alte detalii sau clarificari.'.
-                            ' Vei genera o singura recomandare pentru un singur produs doar cu informatia pe care o ai.\n'.
-                            ' Daca nu exista nicio legatura intre produse si reteta vei raspunde cu textul "null".\n'.
+                            'Vei genera o singura recomandare pentru un singur produs doar cu informatia pe care o ai.\n'.
+                            'Daca nu exista nicio legatura intre produse si reteta vei raspunde cu textul "null".\n'.
                             'Recomandarea trebuie sa fie in limba romana fara alte tag-uri html inafara de <a href="url site">Nume Produs</a>.\n HTML: \n',
                     ]
                 ],
-                'temperature' => 0.15,
+                'temperature' => 0,
                 'max_tokens' => 1024,
             ]);
             $recomandation = $response->choices[0]->message->content;

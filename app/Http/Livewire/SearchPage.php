@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Campaign;
 use App\Models\Recipe;
 use Livewire\Component;
 use OpenAI\Client;
@@ -10,10 +11,10 @@ class SearchPage extends Component
 {
     public string $userPrompt = '';
     public bool $isLoading = false;
-
+    public string $recomandations = '';
     private Client $openAIClient;
 
-    protected $listeners = ['tagClicked' => 'onTagClicked'];
+    protected $listeners = ['tagClicked' => 'onTagClicked', 'recipeGenerated' => 'onRecipeGenerated'];
     public array $recipe = [];
 
     public function __construct()
@@ -83,9 +84,9 @@ class SearchPage extends Component
         } else {
             $this->message = 'RateLimitException. Te rog sa incerci din nou.';
         }
+        $this->recomandations = '';
 
-
-
+        $this->emit('recipeGenerated', $this->recipe);
         $this->isLoading = false;
     }
 
@@ -94,6 +95,8 @@ class SearchPage extends Component
         return view('livewire.search-page', [
             'userPrompt' => $this->userPrompt,
             'isLoading' => $this->isLoading,
+            'recipe' => $this->recipe,
+            'recomandations' => $this->recomandations,
         ]);
     }
 
@@ -111,5 +114,45 @@ class SearchPage extends Component
         }
 
         return $results;
+    }
+
+    public function onRecipeGenerated($recipe)
+    {
+        try {
+            $campaigns = Campaign::all();
+            $products = '';
+            foreach ($campaigns as $campaign) {
+                $products .= $campaign->name . ' -> ' . $campaign->url . ' \n';
+            }
+            $response = $this->openAIClient->chat()->create([
+                'model' => 'gpt-3.5-turbo',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'Esti un sistem de recomandari.',
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => 'Avand aceste produse in baza de date de campanii: \n'.
+                            $products.
+                            'In cazul in care ingredientele din reteta urmatoare au legatura cu produsele vei genera o recomandare de cumparare.\n'.
+                            'Reteta este: \n'.
+                            json_encode($recipe).'\n\n'.
+                            'Vei raspunde cu un HTML ce poate fi randat pe o pagina. Nu vei oferi alte detalii sau clarificari.'.
+                            ' Vei genera o singura recomandare pentru un singur produs doar cu informatia pe care o ai.\n'.
+                            ' Daca nu exista nicio legatura intre produse si reteta vei raspunde cu textul "null".\n'.
+                            'Recomandarea trebuie sa fie in limba romana fara alte tag-uri html inafara de <a href="url site">Nume Produs</a>.\n HTML: \n',
+                    ]
+                ],
+                'temperature' => 0.15,
+                'max_tokens' => 1024,
+            ]);
+            $recomandation = $response->choices[0]->message->content;
+        } catch (\Exception $exception) {
+        }
+
+        if (is_string($recomandation) && $recomandation !== 'null') {
+            $this->recomandations = $recomandation;
+        }
     }
 }

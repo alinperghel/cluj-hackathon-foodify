@@ -5,3 +5,11 @@
 [x-cloak] {
     display: none;
 }
+
+.bg-blue-500 {
+    background-color: #0CC0DF;
+}
+
+a {
+    color: #0CC0DF!important;
+}

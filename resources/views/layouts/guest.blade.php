@@ -16,6 +16,9 @@
         <livewire:styles />
     </head>
     <body>
+        <div class="flex-shrink-0 justify-center bg-gray-100 dark:bg-gray-900 pt-8 pb-4">
+            <img class="h-20 mx-auto" src="{{ asset('images/logo.png') }}" alt="logo">
+        </div>
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
             {{ $slot }}
         </div>

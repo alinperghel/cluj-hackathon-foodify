@@ -19,7 +19,7 @@
                             id="sendButton"
                             name="sendButton"
                             wire:click="onClickSearch"
-                            class="bg-blue-500 text-gray-300 font-bold py-2 px-4 rounded-r flex items-center ml-2 {{ $this->isLoading ? 'disabled:opacity-25' : '' }}"
+                            class="bg-blue-500 text-white font-bold py-2 px-4 rounded-r flex items-center ml-2 {{ $this->isLoading ? 'disabled:opacity-25' : '' }}"
                             {{ $this->isLoading ? 'disabled' : '' }}
                         >
                             <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -71,6 +71,22 @@
                         <div>
                             <h2 class="text-lg">Preparare</h2>
                             <p>{!! $this->recipe['instructions'] !!}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+    @if(!empty($this->recomandations))
+        <div class="py-6">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                    <div class="grid grid-cols-1">
+                        <div class="text-center">
+                            <h2 class="text-xl">Recomandare de cumparare</h2>
+                        </div>
+                        <div>
+                            <p>{!! $this->recomandations  !!}</p>
                         </div>
                     </div>
                 </div>

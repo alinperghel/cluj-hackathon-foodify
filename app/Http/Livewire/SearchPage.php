@@ -118,6 +118,7 @@ class SearchPage extends Component
 
     public function onRecipeGenerated($recipe)
     {
+        $recomandation = '';
         try {
             $campaigns = Campaign::all();
             $products = '';
@@ -149,6 +150,7 @@ class SearchPage extends Component
             ]);
             $recomandation = $response->choices[0]->message->content;
         } catch (\Exception $exception) {
+            $recomandation = '';
         }
 
         if (is_string($recomandation) && $recomandation !== 'null') {

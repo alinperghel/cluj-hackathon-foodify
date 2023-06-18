@@ -19,8 +19,8 @@ class SearchPage extends Component
     public function __construct()
     {
         $this->openAIClient = \OpenAI::client(
-            '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',
-            'org-13XqhgSIiTfx62J31IrzqLHM'
+            env('OPENAI_KEY'),
+            env('OPENAI_ORG')
         );
 
         parent::__construct();
@@ -65,7 +65,6 @@ class SearchPage extends Component
                 'temperature' => 0.15,
                 'max_tokens' => 1024,
             ]);
-
             $recipe = json_decode($response->choices[0]->message->content, true);
         } catch (\Exception $exception) {
             $this->message = 'RateLimitException. Te rog sa incerci din nou.';
